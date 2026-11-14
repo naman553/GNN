@@ -1,0 +1,6 @@
+task,seed,roc_auc,average_precision,attribute_only_roc_auc,structure_only_roc_auc,final_loss
+node_DOMINANT_style,42,0.8942307692307692,0.7083333333333333,0.8942307692307692,0.10576923076923075,
+edge_GCN_link_anomaly,43,0.4625,0.849743674583071,,,1.3936762809753418
+subgraph_feature_structure_baseline,44,1.0,0.9999999999999999,,,
+graph_level_GIN_inspired_reconstruction,45,1.0,1.0,,,0.07733626663684845
+dynamic_GCN_GRU_predictive_baseline,46,1.0,1.0,,,0.43970680236816406

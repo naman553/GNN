@@ -1,0 +1,18 @@
+1. Extract graph_anomaly_detection_project.zip.
+2. Open the extracted folder in VS Code (File > Open Folder).
+3. Open Terminal > New Terminal (PowerShell).
+4. Create and activate an environment:
+   py -3.11 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+5. Install CUDA-enabled PyTorch from https://pytorch.org/get-started/locally/
+6. Install remaining packages:
+   pip install -r requirements.txt
+7. Check your environment:
+   python check_environment.py
+8. Run a quick test:
+   python run_all.py --epochs 8 --nodes 180
+9. Run longer experiments:
+   python run_all.py --epochs 80
+10. Open report/REPORT_TEMPLATE.md and fill it using your actual generated results.
+
+Do not copy sample or smoke-test metrics into your report as final results.

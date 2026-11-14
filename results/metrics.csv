@@ -1,0 +1,6 @@
+task,roc_auc,average_precision,precision,recall,f1,final_loss
+node_DOMINANT_style,0.7663511187607573,0.61657041271387,0.5714285714285714,0.5714285714285714,0.5714285714285714,0.6537050008773804
+edge_link_surprise_baseline,0.8083311899862825,0.8291736777361851,,,,1.150794267654419
+subgraph_community_deviation_baseline,1.0,1.0,,,,
+graph_level_GIN_style_one_class,1.0,0.9999999999999999,,,,
+dynamic_GCN_GRU_temporal_baseline,1.0,1.0,,,,0.33841943740844727
