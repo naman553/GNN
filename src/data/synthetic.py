@@ -22,7 +22,9 @@ def make_attributed_graph(
         x: Node feature tensor
         adj: Adjacency matrix tensor
         edge_index: Bidirectional edge index
-        labels: Node anomaly labels
+        labels: Overall node anomaly labels
+        attribute_labels: Attribute anomaly labels
+        structural_labels: Structural anomaly labels
         graph: NetworkX graph
         communities: Community assignments
     """
@@ -37,6 +39,7 @@ def make_attributed_graph(
         raise ValueError("anomaly_fraction must be between 0 and 1.")
 
     rng = np.random.default_rng(seed)
+
     n = num_nodes
     groups = 4
 
@@ -44,7 +47,11 @@ def make_attributed_graph(
     community = np.arange(n) % groups
 
     # Generate community-specific feature distributions
-    centers = rng.normal(0, 1, (groups, feature_dim))
+    centers = rng.normal(
+        0,
+        1,
+        (groups, feature_dim)
+    )
 
     x = (
         centers[community]
@@ -68,7 +75,10 @@ def make_attributed_graph(
                 g.add_edge(i, j)
 
     # Select anomalous nodes
-    count = min(n, max(4, int(n * anomaly_fraction)))
+    count = min(
+        n,
+        max(4, int(n * anomaly_fraction))
+    )
 
     anomaly_nodes = rng.choice(
         n,
@@ -76,18 +86,21 @@ def make_attributed_graph(
         replace=False
     )
 
-    # Split anomalies into attribute and structural anomalies
+    # Split anomalies into two groups
     n_attr = count // 2
 
+    attribute_nodes = anomaly_nodes[:n_attr]
+    structural_nodes = anomaly_nodes[n_attr:]
+
     # Attribute anomaly injection
-    x[anomaly_nodes[:n_attr]] = rng.normal(
+    x[attribute_nodes] = rng.normal(
         4.0,
         1.0,
-        (n_attr, feature_dim)
+        (len(attribute_nodes), feature_dim)
     ).astype(np.float32)
 
     # Structural anomaly injection
-    for u in anomaly_nodes[n_attr:]:
+    for u in structural_nodes:
 
         candidates = np.where(
             community != community[u]
@@ -103,7 +116,6 @@ def make_attributed_graph(
             g.add_edge(int(u), int(v))
 
     # Generate adjacency matrix
-    # Convert dtype after NetworkX conversion to avoid Pylance dtype warnings
     adj = nx.to_numpy_array(g).astype(np.float32)
 
     np.fill_diagonal(adj, 0)
@@ -125,14 +137,24 @@ def make_attributed_graph(
             dtype=np.int64
         )
 
-    # Node anomaly labels
-    labels = np.isin(
-        np.arange(n),
-        anomaly_nodes
-    ).astype(np.int64)
+    # Separate anomaly labels
+    attribute_labels = np.zeros(n, dtype=np.int64)
+    structural_labels = np.zeros(n, dtype=np.int64)
+
+    attribute_labels[attribute_nodes] = 1
+    structural_labels[structural_nodes] = 1
+
+    # Overall anomaly labels
+    labels = np.maximum(
+        attribute_labels,
+        structural_labels
+    )
 
     return {
-        "x": torch.tensor(x, dtype=torch.float32),
+        "x": torch.tensor(
+            x,
+            dtype=torch.float32
+        ),
 
         "adj": torch.tensor(
             adj,
@@ -145,6 +167,10 @@ def make_attributed_graph(
         ),
 
         "labels": labels,
+
+        "attribute_labels": attribute_labels,
+
+        "structural_labels": structural_labels,
 
         "graph": g,
 
@@ -329,7 +355,10 @@ def make_temporal_data(
     # Inject anomalies into the final snapshot
     labels = np.zeros(n, dtype=np.int64)
 
-    n_anomalous = min(n, max(4, n // 12))
+    n_anomalous = min(
+        n,
+        max(4, n // 12)
+    )
 
     chosen = rng.choice(
         n,
