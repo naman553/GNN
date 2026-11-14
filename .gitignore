@@ -4,3 +4,9 @@ __pycache__/
 results/checkpoints/*.pt
 results/plots/*.png
 results/predictions/*.csv
+
+# AmazonFail research cleanup
+*.pt
+*.pth
+results_amazon_ablation/*_seed_*/
+results_amazon_directed/*_seed_*/
